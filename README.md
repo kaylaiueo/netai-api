@@ -16,7 +16,7 @@ pnpm install
 bun install
 ```
 
-Setup .env file, check file [.env.example](./env.example) to see what you need. and create an `.env` file in the root folder.
+Setup .env file, check file [.env.example](./.env.example) to see what you need. and create an `.env` file in the root folder.
 
 Change the cors origin setting
 
