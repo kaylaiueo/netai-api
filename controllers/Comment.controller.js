@@ -27,6 +27,7 @@ export const getCommentById = async (req, res) => {
         ],
       },
     ]);
+
     res.json({ success: true, data: comment });
   } catch (error) {
     res.json({ success: false, message: error.message });
@@ -63,6 +64,7 @@ export const createComment = async (req, res) => {
       ref,
       owner,
     });
+
     await postNewComment.save();
 
     await PostModel.findByIdAndUpdate(postId, {
@@ -101,6 +103,7 @@ export const createComment = async (req, res) => {
         content: postNewComment._id,
         ref: post._id,
       });
+
       await newActivity.save();
 
       await UserModel.find({
@@ -125,6 +128,7 @@ export const createComment = async (req, res) => {
         content: postNewComment._id,
         ref: post._id,
       });
+
       await newActivity.save();
 
       await UserModel.findByIdAndUpdate(post.owner._id, {

@@ -8,6 +8,7 @@ import { commentsRouter } from "./routes/comment.js";
 import { repliesRouter } from "./routes/replies.js";
 
 const app = express();
+const port = 5000;
 
 app.use(express.json());
 app.use(cors({ origin: "https://netai.vercel.app" }));
@@ -18,7 +19,7 @@ app.use("/comment", commentsRouter);
 app.use("/reply", repliesRouter);
 
 app.get("/", (req, res) => {
-  res.send("hai");
+  res.send("Hi");
 });
 
 mongoose.connect(process.env.MONGODB_URL, {
@@ -26,4 +27,4 @@ mongoose.connect(process.env.MONGODB_URL, {
   useUnifiedTopology: true,
 });
 
-app.listen(5000, () => console.log("server running on port 5000"));
+app.listen(port, () => console.log(`Server is running on port ${port}`));

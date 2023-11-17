@@ -30,6 +30,7 @@ export const createReplyComment = async (req, res) => {
       ref,
       owner,
     });
+
     await postNewReply.save();
 
     await CommentModel.findByIdAndUpdate(commentId, {
@@ -68,6 +69,7 @@ export const createReplyComment = async (req, res) => {
         content: postNewReply._id,
         ref: comment._id,
       });
+
       await newActivity.save();
 
       await UserModel.find({
@@ -92,6 +94,7 @@ export const createReplyComment = async (req, res) => {
         content: postNewReply._id,
         ref: comment._id,
       });
+
       await newActivity.save();
 
       await UserModel.findByIdAndUpdate(comment.owner._id, {
