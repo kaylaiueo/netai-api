@@ -1,32 +1,55 @@
-# Usage Instructions for Contributors
+# Netai API
+
+Back-end service for [Netai](https://netai.vercel.app).
+
+## Installation & Usage Instructions
 
 Clone the project:
 
-```
+```sh
 git clone https://github.com/kaylaiueo/netai-api.git
+```
+
+Open the directory and install the dependencies with the one of your favorite
+package manager:
+
+```sh
 cd netai-api
-```
 
-Install packages
-
-```
+# Node.js package manager
 npm install
+
+# Yarn package manager
 yarn install
+
+# pnpm package manager
 pnpm install
+
+# Bun runtime
 bun install
 ```
 
-Setup .env file, check file [.env.example](./.env.example) to see what you need. and create an `.env` file in the root folder.
+Copy the [`.env.example`](.env.example) file into `.env` in the root directory:
 
-Change the cors origin setting
+```sh
+cp .env.example .env
+```
 
-And start your build process:
+> [!IMPORTANT]
+> You need to deploy database at [MongoDB Cloud](https://cloud.mongodb.com/) and
+> create a new cluster for connecting MongoDB and getting the URL for `.env`.
 
-| Command       | Description                              |
-| ------------- | ---------------------------------------- |
-| `npm run dev` | Starts a development instance of the app |
-| `npm start`   | Starts the app in production mode        |
+Start the build process:
+
+| Command       | Description                               |
+| ------------- | ----------------------------------------- |
+| `npm run dev` | Start the development instance of the app |
+| `npm start`   | Start the app in production mode          |
+
+> [!NOTE]
+> If you have problem with the CORS origin, you need to change the CORS origin
+> settings in the source code.
 
 ## License
 
-Netai is licensed under the terms of the [MIT license](./LICENSE).
+Netai source code is licensed under the [MIT license](LICENSE).
