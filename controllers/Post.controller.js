@@ -133,6 +133,7 @@ export const createPost = async (req, res) => {
       caption,
       owner,
     });
+
     await newPost.save();
 
     await UserModel.findByIdAndUpdate(owner, {
@@ -164,6 +165,7 @@ export const createPost = async (req, res) => {
         author: newPost.owner._id,
         content: newPost._id,
       });
+
       await newActivity.save();
 
       await UserModel.find({
@@ -270,6 +272,7 @@ export const likePost = async (req, res) => {
         message: "liked your post",
         ref: postId,
       });
+
       await newActivity.save();
 
       await UserModel.findByIdAndUpdate(post.owner._id, {

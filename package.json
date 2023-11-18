@@ -1,16 +1,24 @@
 {
-  "name": "server",
-  "version": "1.0.0",
-  "description": "",
+  "name": "netai-api",
+  "version": "0.1.0",
+  "description": "Netai API for back-end service.",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
-  "keywords": [],
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kaylaiueo/netai-api"
+  },
+  "keywords": ["api", "back-end"],
+  "author": "kaylaiueo",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kaylaiueo/netai-api/issues"
+  },
+  "homepage": "https://netai.vercel.app/",
   "dependencies": {
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",

@@ -25,6 +25,7 @@ export const getSuggestedUsers = async (req, res) => {
 
 export const getUserByUsername = async (req, res) => {
   const { username } = req.params;
+
   try {
     const user = await UserModel.findOne({ username })
       .populate([
@@ -136,6 +137,7 @@ export const register = async (req, res) => {
       username,
       password: hashedPassword,
     });
+
     await newUser.save();
 
     res.json({ success: true, message: "Registered successfully!" });
@@ -183,6 +185,7 @@ export const editProfile = async (req, res) => {
       link,
       picture,
     });
+
     await user.save();
 
     res.json({ success: true, data: user.picture });
@@ -203,6 +206,7 @@ export const follow = async (req, res) => {
       author: userId,
       type: "forYou",
     });
+
     await newActivity.save();
 
     await UserModel.findByIdAndUpdate(userId, {
