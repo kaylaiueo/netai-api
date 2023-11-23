@@ -11,6 +11,5 @@ router.get("/liked", controller.getLikedPostsByUsername);
 router.get("/:postId", controller.getPostById);
 router.delete("/:postId", controller.deletePost);
 router.put("/like/:postId", controller.likePost);
-router.put("/dislike/:postId", controller.dislikePost);
 
 export { router as postsRouter };

@@ -69,7 +69,6 @@ export const createReplyComment = async (req, res) => {
         content: postNewReply._id,
         ref: comment._id,
       });
-
       await newActivity.save();
 
       await UserModel.find({
@@ -116,13 +115,16 @@ export const deleteReplyComment = async (req, res) => {
   try {
     const deletedReply = await RepliesModel.findByIdAndDelete(replyId);
 
-    await CommentModel.findByIdAndUpdate(deletedReply.ref, {
+    const comment = await CommentModel.findByIdAndUpdate(deletedReply.ref, {
       $pull: {
         replies: replyId,
       },
     });
 
-    if (deletedReply.text.match(/@\w+/g)) {
+    if (
+      comment.owner._id.toString() !== deletedReply.owner._id.toString() ||
+      deletedReply.text.match(/@\w+/g)
+    ) {
       const deletedActivity = await ActivitiesModel.findOneAndDelete({
         content: replyId,
       });
@@ -137,16 +139,6 @@ export const deleteReplyComment = async (req, res) => {
         },
       });
     }
-
-    const deletedActivity = await ActivitiesModel.findOneAndDelete({
-      content: replyId,
-    });
-
-    await UserModel.findByIdAndUpdate(deletedActivity.owner, {
-      $pull: {
-        activities: deletedActivity._id,
-      },
-    });
 
     res.json({ success: true, message: "Deleted successfully!" });
   } catch (error) {

@@ -13,5 +13,6 @@ router.post("/login", controller.login);
 router.put("/edit/profile", controller.editProfile);
 router.put("/follow", controller.follow);
 router.put("/unfollow", controller.unfollow);
+router.delete("/:userId", controller.deleteAcc);
 
 export { router as usersRouter };

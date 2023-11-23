@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
 import { UserModel } from "../models/User.model.js";
 import { ActivitiesModel } from "../models/Activities.model.js";
+import { PostModel } from "../models/Post.model.js";
+import { CommentModel } from "../models/Comment.model.js";
+import { RepliesModel } from "../models/Replies.model.js";
 
 export const getSuggestedUsers = async (req, res) => {
   const { id } = req.query;
@@ -137,7 +140,6 @@ export const register = async (req, res) => {
       username,
       password: hashedPassword,
     });
-
     await newUser.save();
 
     res.json({ success: true, message: "Registered successfully!" });
@@ -253,6 +255,183 @@ export const unfollow = async (req, res) => {
     });
 
     res.json({ success: true, message: "Unfollowed" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const deleteAcc = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const deletedUser = await UserModel.findOneAndDelete({
+      _id: userId,
+    }).select("_id following followers");
+
+    await UserModel.find({
+      $or: [
+        { following: { $in: deletedUser._id } },
+        { followers: { $in: deletedUser._id } },
+      ],
+    }).updateMany({
+      $pull: {
+        following: { $in: deletedUser._id },
+        followers: { $in: deletedUser._id },
+      },
+    });
+
+    const userPosts = await PostModel.find({
+      owner: deletedUser._id,
+    }).select("_id");
+
+    await PostModel.deleteMany({ _id: { $in: userPosts } });
+
+    await PostModel.find({
+      likes: { $in: deletedUser._id },
+    }).updateMany({
+      $pull: {
+        likes: { $in: deletedUser._id },
+      },
+    });
+
+    const commentsOnUserPosts = await CommentModel.find({
+      ref: { $in: userPosts },
+    }).select("_id");
+
+    await CommentModel.deleteMany({ _id: { $in: commentsOnUserPosts } });
+
+    const getCommentsOnOtherPosts = await CommentModel.find({
+      owner: { $in: deletedUser._id },
+    }).select("replies ref _id");
+
+    const commentsId = getCommentsOnOtherPosts.map((data) => data._id);
+    const commentsRef = getCommentsOnOtherPosts.map((data) => data.ref);
+    const repliesOnComment = getCommentsOnOtherPosts.flatMap(
+      (data) => data.replies
+    );
+
+    if (repliesOnComment.length > 0) {
+      await RepliesModel.deleteMany({
+        _id: { $in: repliesOnComment },
+      });
+    }
+
+    await CommentModel.deleteMany({
+      _id: { $in: commentsId },
+    });
+
+    await PostModel.find({
+      _id: { $in: commentsRef },
+    }).updateMany({
+      $pull: {
+        comments: { $in: commentsId },
+      },
+    });
+
+    const repliesCommentOnUserPosts = await RepliesModel.find({
+      ref: { $in: commentsOnUserPosts },
+    }).select("_id");
+
+    await RepliesModel.deleteMany({
+      _id: { $in: repliesCommentOnUserPosts },
+    });
+
+    const getRepliesOnOtherComments = await RepliesModel.find({
+      owner: { $in: deletedUser._id },
+    }).select("ref _id");
+
+    const repliesId = getRepliesOnOtherComments.map((data) => data._id);
+    const repliesRef = getRepliesOnOtherComments.map((data) => data.ref);
+
+    await RepliesModel.deleteMany({
+      _id: { $in: repliesId },
+    });
+
+    await CommentModel.find({
+      _id: { $in: repliesRef },
+    }).updateMany({
+      $pull: {
+        replies: { $in: repliesId },
+      },
+    });
+
+    const deleteActivitiesByAuthor = await ActivitiesModel.find({
+      author: { $in: deletedUser._id },
+    }).select("_id owner");
+
+    const activitiesIdByAuthor = deleteActivitiesByAuthor.map(
+      (data) => data._id
+    );
+    const activitiesOwnerByAuthor = deleteActivitiesByAuthor.flatMap(
+      (data) => data.owner
+    );
+
+    await ActivitiesModel.deleteMany({
+      _id: { $in: activitiesIdByAuthor },
+    });
+
+    await UserModel.find({
+      _id: { $in: activitiesOwnerByAuthor },
+    }).updateMany({
+      $pull: {
+        activities: { $in: activitiesIdByAuthor },
+      },
+    });
+
+    const activitiesWithOneOwner = await ActivitiesModel.find({
+      $and: [{ owner: { $size: 1 } }, { owner: { $in: deletedUser._id } }],
+    }).select("_id");
+
+    await ActivitiesModel.deleteMany({
+      _id: { $in: activitiesWithOneOwner },
+    });
+
+    await ActivitiesModel.find({
+      $and: [
+        {
+          $expr: {
+            $gt: [{ $size: "$owner" }, 1],
+          },
+        },
+        { owner: { $in: deletedUser._id } },
+      ],
+    }).updateMany({
+      $pull: {
+        owner: { $in: deletedUser._id },
+      },
+    });
+
+    const getActivities = await ActivitiesModel.find({
+      $or: [
+        {
+          $or: [
+            { content: { $in: userPosts } },
+            { content: { $in: commentsId } },
+            { content: { $in: repliesId } },
+          ],
+        },
+        {
+          $or: [{ ref: { $in: userPosts } }, { ref: { $in: commentsId } }],
+        },
+      ],
+    }).select("_id owner");
+
+    const activitiesId = getActivities.map((data) => data._id);
+    const activitiesOwner = getActivities.flatMap((data) => data.owner);
+
+    await ActivitiesModel.deleteMany({
+      _id: { $in: activitiesId },
+    });
+
+    await UserModel.find({
+      _id: { $in: activitiesOwner },
+    }).updateMany({
+      $pull: {
+        activities: { $in: activitiesId },
+      },
+    });
+
+    res.json({ success: true, message: "Delete account successfully" });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
