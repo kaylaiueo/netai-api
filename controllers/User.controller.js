@@ -177,20 +177,48 @@ export const login = async (req, res) => {
 };
 
 export const editProfile = async (req, res) => {
-  const { name, bio, link, picture } = req.body;
+  const { name, bio, link, picture, username } = req.body;
   const { id } = req.query;
 
   try {
-    const user = await UserModel.findByIdAndUpdate(id, {
+    const user = await UserModel.findById(id).select("updatedAt username");
+
+    const currentDate = new Date();
+    const isTwoWeeks = new Date(
+      user.updatedAt.getTime() + 14 * 24 * 60 * 60 * 1000
+    );
+
+    if (currentDate !== isTwoWeeks && user.username !== username) {
+      return res.status(400).json({
+        success: false,
+        message: `You can change your username after ${isTwoWeeks.toLocaleDateString(
+          "en-US",
+          { dateStyle: "long" }
+        )}`,
+      });
+    }
+
+    const isUserExists = await UserModel.findOne({ username });
+
+    if (isUserExists && isUserExists._id.toString() !== id) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists, try another username",
+      });
+    }
+
+    const updateUser = await UserModel.findByIdAndUpdate(id, {
       name,
       bio,
       link,
       picture,
+      username,
+      ...(!isUserExists && { updatedAt: new Date() }),
     });
 
-    await user.save();
+    await updateUser.save();
 
-    res.json({ success: true, data: user.picture });
+    res.json({ success: true, data: updateUser.picture });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
