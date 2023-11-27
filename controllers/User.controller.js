@@ -183,19 +183,21 @@ export const editProfile = async (req, res) => {
   try {
     const user = await UserModel.findById(id).select("updatedAt username");
 
-    const currentDate = new Date();
-    const isTwoWeeks = new Date(
-      user.updatedAt.getTime() + 14 * 24 * 60 * 60 * 1000
-    );
+    if (user.updatedAt) {
+      const currentDate = new Date();
+      const isTwoWeeks = new Date(
+        user.updatedAt.getTime() + 14 * 24 * 60 * 60 * 1000
+      );
 
-    if (currentDate !== isTwoWeeks && user.username !== username) {
-      return res.status(400).json({
-        success: false,
-        message: `You can change your username after ${isTwoWeeks.toLocaleDateString(
-          "en-US",
-          { dateStyle: "long" }
-        )}`,
-      });
+      if (currentDate !== isTwoWeeks && user.username !== username) {
+        return res.status(400).json({
+          success: false,
+          message: `You can change your username after ${isTwoWeeks.toLocaleDateString(
+            "en-US",
+            { dateStyle: "long" }
+          )}`,
+        });
+      }
     }
 
     const isUserExists = await UserModel.findOne({ username });
